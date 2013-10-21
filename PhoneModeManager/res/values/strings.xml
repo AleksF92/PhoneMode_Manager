@@ -3,6 +3,9 @@
 
     <string name="app_name">PhoneMode Manager</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="button_map">Map Test</string>
+    <string name="button_silence">Silence Test</string>
+    <string name="button_back">Back</string>
+    <string name="silence_mode">Silence Mode</string>
 
 </resources>

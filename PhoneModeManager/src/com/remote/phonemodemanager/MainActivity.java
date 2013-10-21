@@ -2,7 +2,9 @@ package com.remote.phonemodemanager;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.view.Menu;
+import android.view.View;
 
 public class MainActivity extends Activity {
 
@@ -19,4 +21,15 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	public void onClick_Map(View view) {
+		// Fires whenever the map button is clicked.
+		Intent intent = new Intent(this, LocationActivity.class);
+		startActivity(intent);
+	}
+	
+	public void onClick_Silence(View view) {
+		// Fires whenever the silence button is clicked.
+		Intent intent = new Intent(this, SilenceActivity.class);
+		startActivity(intent);
+	}
 }
