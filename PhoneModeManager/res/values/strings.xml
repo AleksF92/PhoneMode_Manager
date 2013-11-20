@@ -3,9 +3,17 @@
 
     <string name="app_name">PhoneMode Manager</string>
     <string name="action_settings">Settings</string>
-    <string name="button_map">Map Test</string>
+    <string name="button_map">Map test</string>
     <string name="button_silence">Silence Test</string>
     <string name="button_back">Back</string>
-    <string name="silence_mode">Silence Mode</string>
+    <string name="silence_mode">Silence mode</string>
+    <string name="event_title">New event</string>
+    <string name="event_range">Range (meters):</string>
+    <string name="event_type">Type:</string>
+    <string name="button_continue">Continue</string>
+    <string name="tip_range_min">20</string>
+    <string name="tip_range_max">200</string>
+    <string name="button_save">Save</string>
+    <string name="event_setTo">Change to:</string>
 
 </resources>

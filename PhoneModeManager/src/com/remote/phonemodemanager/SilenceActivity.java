@@ -31,14 +31,14 @@ public class SilenceActivity extends Activity {
 		saveSilenceMode();
 	}
 	
-	public void onClick_Back(View view) {
+	public void onClick_TestBack(View view) {
 		// Fires whenever the silence button is toggeled.
 		this.finish();
 	}
 	
 	public void loadSilenceMode() {
 		// Checks what the silence mode is and sets the button
-		ToggleButton silenceMode = (ToggleButton) findViewById(R.id.btn_ToggleSilence);
+		ToggleButton silenceMode = (ToggleButton) findViewById(R.id.btn_TestToggle);
 		AudioManager soundSettings = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
 		switch (soundSettings.getRingerMode()) {
@@ -59,7 +59,7 @@ public class SilenceActivity extends Activity {
 	
 	public void saveSilenceMode() {
 		// Checks what the silence mode is and sets the button
-		ToggleButton silenceMode = (ToggleButton) findViewById(R.id.btn_ToggleSilence);
+		ToggleButton silenceMode = (ToggleButton) findViewById(R.id.btn_TestToggle);
 		AudioManager soundSettings = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
 		if (silenceMode.isChecked()) {

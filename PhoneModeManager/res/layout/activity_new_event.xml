@@ -1,0 +1,89 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_blur_red"
+    tools:context=".NewEventActivity" >
+
+    <TextView
+        android:id="@+id/txt_EventTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="31dp"
+        android:text="@string/event_title"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/txt_EventRange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/txt_EventTitle"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="33dp"
+        android:text="@string/event_range"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <SeekBar
+        android:id="@+id/bar_EventRange"
+        android:layout_width="260dp"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/txt_EventRange"
+        android:layout_below="@id/txt_EventRange" />
+
+    <Button
+        android:id="@+id/btn_EventBack"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:onClick="onClick_EventBack"
+        android:text="@string/button_back" />
+
+    <Button
+        android:id="@+id/btn_EventContinue"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:onClick="onClick_EventContinue"
+        android:text="@string/button_continue" />
+
+    <TextView
+        android:id="@+id/txt_EventRangeMin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/bar_EventRange"
+        android:layout_below="@id/bar_EventRange"
+        android:text="@string/tip_range_min"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/txt_EventRangeMax"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/bar_EventRange"
+        android:layout_below="@id/bar_EventRange"
+        android:text="@string/tip_range_max"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/txt_EventType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/txt_EventRangeMin"
+        android:layout_below="@id/txt_EventRangeMin"
+        android:layout_marginTop="47dp"
+        android:text="@string/event_type"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Spinner
+        android:id="@+id/box_EventTypes"
+        android:layout_width="260dp"
+        android:layout_height="40dp"
+        android:layout_alignLeft="@id/txt_EventType"
+        android:layout_below="@id/txt_EventType" />
+
+</RelativeLayout>

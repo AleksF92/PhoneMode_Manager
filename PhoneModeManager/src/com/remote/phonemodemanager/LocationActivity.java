@@ -7,6 +7,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
@@ -44,6 +45,9 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
                     .getMap();
             mMap.setOnMapClickListener(this);
             mMap.setMyLocationEnabled(true);
+            
+            //Set camera to current location
+            //To do... !
         }
     }
 
@@ -59,5 +63,9 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 	public void onMapClick(LatLng position) {
 		// TODO Auto-generated method stub
 		setUpMap(position);
+		
+		//Create the new event
+		Intent intent = new Intent(this, NewEventActivity.class);
+		startActivity(intent);
 	}
 }
