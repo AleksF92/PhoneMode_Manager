@@ -9,14 +9,5 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		class="com.google.android.gms.maps.SupportMapFragment" />
-    
-    <Button
-        android:id="@+id/btn_Back"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="onClick_Back"
-        android:text="@string/button_back" />
 
 </RelativeLayout>

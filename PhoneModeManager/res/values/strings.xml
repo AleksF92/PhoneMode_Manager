@@ -9,11 +9,16 @@
     <string name="silence_mode">Silence mode</string>
     <string name="event_title">New event</string>
     <string name="event_range">Range (meters):</string>
-    <string name="event_type">Type:</string>
+    <string name="event_type1">Set silent mode:</string>
+    <string name="event_type2">Set ringtone:</string>
+    <string name="event_type3">Set 3G/WiFi:</string>
     <string name="button_continue">Continue</string>
+    <string name="button_delete">Delete</string>
     <string name="tip_range_min">20</string>
     <string name="tip_range_max">200</string>
     <string name="button_save">Save</string>
     <string name="event_setTo">Change to:</string>
+    <string name="notSet">NOT SET</string>
+    <string name="select">Select</string>
 
 </resources>
