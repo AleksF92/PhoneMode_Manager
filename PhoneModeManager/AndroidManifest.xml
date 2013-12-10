@@ -16,6 +16,8 @@
     <!-- My Location -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Phone call receiving   -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <!-- Maps API needs OpenGL ES 2.0. -->
     <uses-feature
