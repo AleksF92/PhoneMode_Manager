@@ -131,7 +131,7 @@ public class Point {
         this.connection = connection;
     }
 
-    public static final String POINTS_TABLE_NAME = "shows";
+    public static final String POINTS_TABLE_NAME = "points";
     // column names
     static final String ID = "id"; // 
     static final String NAME = "name";
@@ -143,12 +143,13 @@ public class Point {
     static final String CONNECTION = "connection";
     // SQL statement to create our table
     public static final String POINTS_CREATE_TABLE = "CREATE TABLE " + Point.POINTS_TABLE_NAME + " ("
-                                                    + Point.ID + " INTEGER PRIMARY KEY,"
+    		 										+ Point.ID + " INTEGER PRIMARY KEY,"
+                                                    + Point.NAME + " TEXT,"
                                                     + Point.X + " DOUBLE,"
                                                     + Point.Y + " DOUBLE,"
-                                                    + Point.RADIUS + " TEXT"
-                                                    + Point.MODE + " INTEGER"
-                                                    + Point.RINGTONE + " TEXT"
+                                                    + Point.RADIUS + " TEXT,"
+                                                    + Point.MODE + " INTEGER,"
+                                                    + Point.RINGTONE + " TEXT,"
                                                     + Point.CONNECTION + " INTEGER"
                                                     + ");";
 
