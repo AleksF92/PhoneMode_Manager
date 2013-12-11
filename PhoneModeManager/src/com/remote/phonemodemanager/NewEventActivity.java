@@ -2,7 +2,6 @@ package com.remote.phonemodemanager;
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -22,12 +21,14 @@ public class NewEventActivity extends Activity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		/*
 		Log.i("INTENT IN", "EventTitle: " + getIntent().getStringExtra("EventTitle"));
 		Log.i("INTENT IN", "EventIcon: " + getIntent().getIntExtra("EventIcon", R.drawable.img_pin_red));
 		Log.i("INTENT IN", "EventRange: " + getIntent().getIntExtra("EventRange", 20));
 		Log.i("INTENT IN", "EventSilenceOption: " + getIntent().getIntExtra("EventSilenceOption", 0));
 		Log.i("INTENT IN", "EventInternetOption: " + getIntent().getIntExtra("EventInternetOption", 0));
 		Log.i("INTENT IN", "EventRingtone: " + getIntent().getStringExtra("EventRingtone"));
+		*/
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_new_event);
@@ -78,7 +79,7 @@ public class NewEventActivity extends Activity {
 		    	//Show the progress
 		    	int min = 20;
 		    	int cur = min + progress;
-		    	Log.i("DragBar", "Progress is: " + cur);
+		    	//Log.i("DragBar", "Progress is: " + cur);
 		    	
 		    	rangeTxt.setText(getResources().getString(R.string.event_range) + " " + cur);
 		   } 
@@ -107,12 +108,14 @@ public class NewEventActivity extends Activity {
 		EditText eventTitle = (EditText) findViewById(R.id.txt_EventTitle);
 		TextView eventRingtone = (TextView) findViewById(R.id.box_EventRingtoneSelected);
 		
+		/*
 		Log.i("INTENT OUT", "EventTitle: " + eventTitle.getText().toString());
 		Log.i("INTENT OUT", "EventIcon: " + iconSelected);
 		Log.i("INTENT OUT", "EventRange: " + (20 + rangeBar.getProgress()));
 		Log.i("INTENT OUT", "EventSilenceOption: " + boxSilentMode.getSelectedItemPosition());
 		Log.i("INTENT OUT", "EventInternetOption: " + boxInternet.getSelectedItemPosition());
 		Log.i("INTENT OUT", "EventRingtone: " + eventRingtone.getText().toString());
+		*/
 		
 		getIntent().putExtra("EventTitle", eventTitle.getText().toString());
 		getIntent().putExtra("EventIcon", iconSelected);
@@ -151,6 +154,6 @@ public class NewEventActivity extends Activity {
 		
 		ImageView icon = (ImageView) findViewById(R.id.img_Icon);
 		icon.setImageResource(iconSelected);
-		Log.i("SELECTED_ICON", "Resource: " + iconSelected);
+		//Log.i("SELECTED_ICON", "Resource: " + iconSelected);
 	}
 }

@@ -20,5 +20,7 @@
     <string name="event_setTo">Change to:</string>
     <string name="notSet">NOT SET</string>
     <string name="select">Select</string>
+    <string name="service_start">Start Service</string>
+    <string name="service_stop">Stop Service</string>
 
 </resources>

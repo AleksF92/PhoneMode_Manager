@@ -5,5 +5,7 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
+    <item android:id="@+id/serviceStart" android:icon="@android:drawable/ic_media_play" android:title="@string/service_start"></item>
+    <item android:id="@+id/serviceStop" android:icon="@android:drawable/ic_media_pause" android:title="@string/service_stop"></item>
 
 </menu>

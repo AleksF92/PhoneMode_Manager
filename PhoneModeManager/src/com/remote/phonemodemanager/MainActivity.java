@@ -26,10 +26,4 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(this, LocationActivity.class);
 		startActivity(intent);
 	}
-	
-	public void onClick_Silence(View view) {
-		// Fires whenever the silence button is clicked.
-		Intent intent = new Intent(this, SilenceActivity.class);
-		startActivity(intent);
-	}
 }

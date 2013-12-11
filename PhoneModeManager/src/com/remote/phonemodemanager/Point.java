@@ -8,6 +8,32 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class Point {
+	// database name
+    public static final String POINTS_TABLE_NAME = "points";
+    
+    // column names
+    static final String ID = "id"; // 
+    static final String NAME = "name";
+    static final String X = "x";
+    static final String Y = "y";
+    static final String RADIUS = "radius";
+    static final String MODE = "mode";
+    static final String RINGTONE = "ringtone";
+    static final String CONNECTION = "connection";
+    
+    // SQL statement to create our table
+    public static final String POINTS_CREATE_TABLE = "CREATE TABLE " + Point.POINTS_TABLE_NAME + " ("
+    		 										+ Point.ID + " INTEGER PRIMARY KEY,"
+                                                    + Point.NAME + " TEXT,"
+                                                    + Point.X + " DOUBLE,"
+                                                    + Point.Y + " DOUBLE,"
+                                                    + Point.RADIUS + " TEXT,"
+                                                    + Point.MODE + " INTEGER,"
+                                                    + Point.RINGTONE + " TEXT,"
+                                                    + Point.CONNECTION + " INTEGER"
+                                                    + ");";
+	
+    // currently stored variables
 	long id;
 	String name;
 	double x;
@@ -16,7 +42,6 @@ public class Point {
 	int mode;
 	String ringtone;
 	int connection;
-	
     
     private Point() {}
     
@@ -28,6 +53,14 @@ public class Point {
     	this.mode = mode;
     	this.ringtone = ringtone;
     	this.connection = connection;
+    }
+    
+    public static void clear(DatabaseHelper dbHelper) {
+    	final SQLiteDatabase db = dbHelper.getReadableDatabase();
+    	
+    	db.delete(POINTS_TABLE_NAME, null, null);
+    	
+    	db.close();
     }
     
     public void save(DatabaseHelper dbHelper) {
@@ -74,7 +107,6 @@ public class Point {
             return point;
     }
 
-    
     public String getName() {
             return name;
     }
@@ -130,28 +162,4 @@ public class Point {
     public void setConnection(int connection) {
         this.connection = connection;
     }
-
-    public static final String POINTS_TABLE_NAME = "points";
-    // column names
-    static final String ID = "id"; // 
-    static final String NAME = "name";
-    static final String X = "x";
-    static final String Y = "y";
-    static final String RADIUS = "radius";
-    static final String MODE = "mode";
-    static final String RINGTONE = "ringtone";
-    static final String CONNECTION = "connection";
-    // SQL statement to create our table
-    public static final String POINTS_CREATE_TABLE = "CREATE TABLE " + Point.POINTS_TABLE_NAME + " ("
-    		 										+ Point.ID + " INTEGER PRIMARY KEY,"
-                                                    + Point.NAME + " TEXT,"
-                                                    + Point.X + " DOUBLE,"
-                                                    + Point.Y + " DOUBLE,"
-                                                    + Point.RADIUS + " TEXT,"
-                                                    + Point.MODE + " INTEGER,"
-                                                    + Point.RINGTONE + " TEXT,"
-                                                    + Point.CONNECTION + " INTEGER"
-                                                    + ");";
-
-    
 }
