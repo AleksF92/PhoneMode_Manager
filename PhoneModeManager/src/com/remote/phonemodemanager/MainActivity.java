@@ -26,4 +26,10 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(this, LocationActivity.class);
 		startActivity(intent);
 	}
+	
+	public void onClick_CallSettings(View view) {
+		// Fires whenever the map button is clicked.
+		Intent intent = new Intent(this, CallSettingsActivity.class);
+		startActivity(intent);
+	}
 }

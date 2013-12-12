@@ -16,6 +16,9 @@
     <!-- My Location -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Call Manager -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
 
     <!-- Maps API needs OpenGL ES 2.0. -->
     <uses-feature
@@ -33,7 +36,7 @@
          The example key below will not be accepted because it is not linked to the
          certificate which you will use to sign this application.
          See: https://developers.google.com/maps/documentation/android/start
-         for instructions on how to get your own key.
+         for instructions on how to get your own key.
         -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
@@ -54,8 +57,31 @@
         </activity>
         <activity android:name="com.remote.phonemodemanager.SetSilentActivity" >
         </activity>
+
         <service android:name="com.remote.phonemodemanager.LocationService" >
         </service>
+
+        <service
+            android:name="com.remote.phonemodemanager.CallDetectService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
+
+        <receiver android:name="com.remote.phonemodemanager.ScreenReciever" >
+            <intent-filter>
+
+                <!--
+            	<action android:name="android.intent.action.SCREEN_ON" />
+            	<action android:name="android.intent.action.SCREEN_OFF" />
+                -->
+                <action android:name="android.Intent.ACTION_USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+        
+        <activity
+            android:name="com.remote.phonemodemanager.CallSettingsActivity"
+            android:label="@string/title_activity_call_settings" >
+        </activity>
     </application>
 
 </manifest>
