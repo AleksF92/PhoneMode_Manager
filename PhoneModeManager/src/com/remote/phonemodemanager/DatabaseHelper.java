@@ -15,6 +15,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(Point.POINTS_CREATE_TABLE);
+		db.execSQL(Whitelist.WHITELISTED_CREATE_TABLE);
     }
 	
 	@Override
