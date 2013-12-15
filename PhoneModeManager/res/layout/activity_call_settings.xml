@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/textViewDetectState"
-        android:text="Turn on" />
+        android:text="@string/turnOn" />
 
     <Button
         android:id="@+id/buttonExit"
@@ -30,6 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/buttonDetectToggle"
-        android:text="Exit" />
+        android:text="@string/editWhitelist" 
+        android:onClick="onClick_CallSettings"/>
 
 </RelativeLayout>

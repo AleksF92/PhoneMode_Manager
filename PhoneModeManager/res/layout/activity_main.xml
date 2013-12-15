@@ -34,7 +34,7 @@
         android:layout_below="@+id/btn_Map"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
-        android:text="CallSettings"
+        android:text="@string/button_CallSettings"
         android:onClick="onClick_CallSettings" />
 
 </RelativeLayout>

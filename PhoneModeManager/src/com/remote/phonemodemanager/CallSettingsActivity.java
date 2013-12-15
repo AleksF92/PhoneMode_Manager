@@ -29,15 +29,12 @@ public class CallSettingsActivity extends Activity {
 				setDetectEnabled(!detectEnabled);
 			}
 		});
-        
-        buttonExit = (Button) findViewById(R.id.buttonExit);
-        buttonExit.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setDetectEnabled(false);
-				CallSettingsActivity.this.finish();
-			}
-		});
+	}
+	
+	public void onClick_CallSettings(View view) {
+		// Fires whenever the map button is clicked.
+		Intent intent = new Intent(this, ContactListActivity.class);
+		startActivity(intent);
 	}
 	
 	private void setDetectEnabled(boolean enable) {
@@ -48,15 +45,15 @@ public class CallSettingsActivity extends Activity {
     		 // start detect service 
             startService(intent);
             
-            buttonToggleDetect.setText("Turn off");
-    		textViewDetectState.setText("Detecting");
+            buttonToggleDetect.setText(getResources().getString(R.string.disableService));
+    		textViewDetectState.setText(getResources().getString(R.string.serviceRunning));
     	}
     	else {
     		// stop detect service
     		stopService(intent);
     		
-    		buttonToggleDetect.setText("Turn on");
-    		textViewDetectState.setText("Not detecting");
+    		buttonToggleDetect.setText(getResources().getString(R.string.turnOn));
+    		textViewDetectState.setText(getResources().getString(R.string.serviceOff));
     	}
     }
 
