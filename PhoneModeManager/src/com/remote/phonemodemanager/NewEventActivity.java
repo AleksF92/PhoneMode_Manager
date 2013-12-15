@@ -1,7 +1,11 @@
 package com.remote.phonemodemanager;
 
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -18,17 +22,18 @@ public class NewEventActivity extends Activity {
 	Spinner boxSilentMode;
 	Spinner boxInternet;
 	int iconSelected;
+	String ringtoneSelected;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		/*
+		
 		Log.i("INTENT IN", "EventTitle: " + getIntent().getStringExtra("EventTitle"));
 		Log.i("INTENT IN", "EventIcon: " + getIntent().getIntExtra("EventIcon", R.drawable.img_pin_red));
 		Log.i("INTENT IN", "EventRange: " + getIntent().getIntExtra("EventRange", 20));
 		Log.i("INTENT IN", "EventSilenceOption: " + getIntent().getIntExtra("EventSilenceOption", 0));
 		Log.i("INTENT IN", "EventInternetOption: " + getIntent().getIntExtra("EventInternetOption", 0));
 		Log.i("INTENT IN", "EventRingtone: " + getIntent().getStringExtra("EventRingtone"));
-		*/
+		
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_new_event);
@@ -67,7 +72,12 @@ public class NewEventActivity extends Activity {
 		
 		//Set ringtone to data
 		TextView eventRingtone = (TextView) findViewById(R.id.box_EventRingtoneSelected);
-		eventRingtone.setText(getIntent().getStringExtra("EventRingtone"));
+		ringtoneSelected = getIntent().getStringExtra("EventRingtone");
+		if (!ringtoneSelected.equals("NOT SET")) {
+			Uri ringtoneSelectedUri = Uri.parse(ringtoneSelected);
+			String ringtoneTitle = RingtoneManager.getRingtone(this, ringtoneSelectedUri).getTitle(this);
+			eventRingtone.setText(ringtoneTitle);
+		}
 		
 		//Create draggable slider
 		rangeBar = (SeekBar) findViewById(R.id.bar_EventRange);
@@ -106,7 +116,6 @@ public class NewEventActivity extends Activity {
 	public void onClick_EventContinue(View view) {
 		// Fires whenever the silence button is toggeled.
 		EditText eventTitle = (EditText) findViewById(R.id.txt_EventTitle);
-		TextView eventRingtone = (TextView) findViewById(R.id.box_EventRingtoneSelected);
 		
 		/*
 		Log.i("INTENT OUT", "EventTitle: " + eventTitle.getText().toString());
@@ -114,7 +123,7 @@ public class NewEventActivity extends Activity {
 		Log.i("INTENT OUT", "EventRange: " + (20 + rangeBar.getProgress()));
 		Log.i("INTENT OUT", "EventSilenceOption: " + boxSilentMode.getSelectedItemPosition());
 		Log.i("INTENT OUT", "EventInternetOption: " + boxInternet.getSelectedItemPosition());
-		Log.i("INTENT OUT", "EventRingtone: " + eventRingtone.getText().toString());
+		Log.i("INTENT OUT", "EventRingtone: " + ringtoneSelected.toString());
 		*/
 		
 		getIntent().putExtra("EventTitle", eventTitle.getText().toString());
@@ -122,7 +131,7 @@ public class NewEventActivity extends Activity {
 		getIntent().putExtra("EventRange", (20 + rangeBar.getProgress()));
 		getIntent().putExtra("EventSilenceOption", boxSilentMode.getSelectedItemPosition());
 		getIntent().putExtra("EventInternetOption", boxInternet.getSelectedItemPosition());
-		getIntent().putExtra("EventRingtone", eventRingtone.getText().toString());
+		getIntent().putExtra("EventRingtone", ringtoneSelected.toString());
 		
 		getIntent().putExtra("EventDelete", false);
 		
@@ -138,7 +147,34 @@ public class NewEventActivity extends Activity {
 	}
 	
 	public void BrowseForRingtone(View view) {
-		
+		Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select ringtone:");
+		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, false);
+		intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE);
+		this.startActivityForResult(intent, 1);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		//Check if result of the new event settings
+		if (requestCode == 1) {
+			TextView selectedRingtone = (TextView) findViewById(R.id.box_EventRingtoneSelected);
+			
+			if (resultCode == RESULT_OK) {
+			    Uri ringtoneSelectedUri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+			    
+			    if (ringtoneSelectedUri != null) {
+			    	String ringtoneTitle = RingtoneManager.getRingtone(this, ringtoneSelectedUri).getTitle(this);
+			    	selectedRingtone.setText(ringtoneTitle);
+			    	ringtoneSelected = ringtoneSelectedUri.toString();
+			    }
+			}
+			else {
+			    selectedRingtone.setText(getResources().getString(R.string.notSet));
+			    ringtoneSelected = "NOT SET";
+			}
+		}
 	}
 	
 	public void SelectNewIcon(View view) {

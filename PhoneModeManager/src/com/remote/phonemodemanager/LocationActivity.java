@@ -1,13 +1,15 @@
 package com.remote.phonemodemanager;
 
-import java.sql.Timestamp;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -19,18 +21,20 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class LocationActivity extends FragmentActivity implements OnMapClickListener, OnMarkerClickListener {
+public class LocationActivity extends FragmentActivity implements OnMapLongClickListener, OnMarkerClickListener {
 
 	private GoogleMap mMap;
 	Map<String, Event> events = new ConcurrentHashMap<String, Event>();
@@ -39,14 +43,19 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 	static final int MIN_RANGE = 20;
 	Intent serviceIntent;
 	private LatLng myPosition;
-	MarkerOptions myMarker;
 	Date date;
 	private DatabaseHelper dbHelper;
+	LocationManager mLocationManager;
+	String bestProvider;
 	
 	DialogInterface.OnClickListener confirmListener;
 	AlertDialog.Builder boxConfirm;
 	DialogInterface.OnClickListener updateListener;
 	AlertDialog.Builder boxUpdate;
+	
+	int defaultSilentMode;
+	int defaultInternetMode;
+	String defaultRingtone;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,31 +118,88 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 		
 		//Initialize service intent
 		serviceIntent = new Intent(this, LocationService.class);
-		serviceIntent.putExtra("CurrentPositionLng", myPosition.longitude);
-		serviceIntent.putExtra("CurrentPositionLat", myPosition.latitude);
 		
+		saveToDatabase();
+		//Log.i("LocationAct", "The activity was created!");
+	}
+	
+	public void getDefaultSettings() {
 		//Store default system values
 		AudioManager soundSettings = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		int silentMode = 0;
+		defaultSilentMode = 0;
 		switch(soundSettings.getRingerMode()) {
 			case (AudioManager.RINGER_MODE_VIBRATE): {
-				silentMode = 1;
+				defaultSilentMode = 1;
 				break;
 			}
 			case (AudioManager.RINGER_MODE_SILENT): {
-				silentMode = 2;
+				defaultSilentMode = 2;
 				break;
 			}
 			case (AudioManager.RINGER_MODE_NORMAL): {
-				silentMode = 3;
+				defaultSilentMode = 3;
 				break;
 			}
 		}
-		serviceIntent.putExtra("DefaultSilence", silentMode);
-		serviceIntent.putExtra("DefaultInternet", 0);
-		serviceIntent.putExtra("DefaultRingtone", "");
 		
-		//Log.i("LocationAct", "The activity was created!");
+		defaultInternetMode = 0;
+		boolean wifiNet = false;
+		boolean mobileNet = isMobileDataEnabled();
+		WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+		if (wifi.isWifiEnabled()) {
+			wifiNet = true;
+		}
+		
+		if (wifiNet && !mobileNet) {
+			//Wifi
+			defaultInternetMode = 1;
+		}
+		else if (!wifiNet && mobileNet) {
+			//3G
+			defaultInternetMode = 2;
+		}
+		else if (wifiNet && mobileNet) {
+			//Wifi + 3G
+			defaultInternetMode = 3;
+		}
+		
+		defaultRingtone = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE).toString();
+		
+		//Pass values
+		serviceIntent.putExtra("DefaultSilence", defaultSilentMode);
+		serviceIntent.putExtra("DefaultInternet", defaultInternetMode);
+		serviceIntent.putExtra("DefaultRingtone", defaultRingtone);
+		
+		Log.i("ServiceIntent", "DefaultSilence: " + defaultSilentMode);
+		Log.i("ServiceIntent", "DefaultInternet: " + defaultInternetMode);
+		Log.i("ServiceIntent", "DefaultRingtone: " + defaultRingtone);
+	}
+	
+	public boolean isMobileDataEnabled() {
+        ConnectivityManager mobileNet = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        Method mobileDataEnabled = null;
+        boolean isEnabled = false;
+        
+        //Initialize mobile data change
+        try {
+        	mobileDataEnabled = ConnectivityManager.class.getDeclaredMethod("getMobileDataEnabled");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        
+        mobileDataEnabled.setAccessible(true);
+        
+        try {
+        	isEnabled = (Boolean) mobileDataEnabled.invoke(mobileNet);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        
+        return isEnabled;
 	}
 
 	@Override
@@ -148,6 +214,7 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 		
 		switch(item.getItemId()) {
 			case (R.id.serviceStart): {
+				getDefaultSettings();
 				startService(serviceIntent);
 				break;
 			}
@@ -164,9 +231,8 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 		Log.i("Map Setup", "Starting to configure map...");
 		
 		//Enable listeners
-        mMap.setOnMapClickListener(this);
+        mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerClickListener(this);
-        //mMap.setLocationSource(this);
         
         //Enable positioning
         mMap.setMyLocationEnabled(true);
@@ -176,25 +242,62 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
         
         Log.i("Map Setup", "Data setup done!");
         
-        //Gather my position (last known)
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
+        Location location = getLastKnownLocation();
+        
+        double lat = 0;
+        double lng = 0;
+        
+        if (location == null) {
+        	Log.i("Map Setup", "Location: null");
+        }
+        else {
+            lat =  location.getLatitude();
+            lng = location.getLongitude();
+        }
+        
+        //Position
+        myPosition = new LatLng(lat, lng);
+        
+        //Move camera
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+        
+        Log.i("Map Setup", "Map setup done!");
+        
+        //Load saved events
+        loadFromDatabase();
+	}
+	
+    private Location getLastKnownLocation() {
+    	mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        bestProvider = "";
+        
+        for (String provider : providers) {
+            Location l = mLocationManager.getLastKnownLocation(provider);
+
+            if (l != null) {
+	            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+	                bestLocation = l;
+	                bestProvider = provider;
+	            }
+            }
+        }
+        
+        //Set location listener
+        mLocationManager.requestLocationUpdates(bestProvider, 5000, 0, new LocationListener() {
         	@Override
         	public void onLocationChanged(Location location) {
         		//My location changed
-        		myPosition = new LatLng(location.getLatitude(), location.getLatitude());
-        		date = new Date();
-        		
-        		//Update marker
-        		myMarker.snippet(new Timestamp(date.getTime()).toString());
-        		myMarker.position(myPosition);
-        		
-        		//Update map
-        		//updateMap();
+        		myPosition = new LatLng(location.getLatitude(), location.getLongitude());
         		
                 //Move camera
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
-                //mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+                //mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
+                //mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+               
+                //Update database
+                saveToDatabase();
                 
                 //Show dialog
                 boxUpdate.show();
@@ -218,48 +321,12 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
         	}
         });
         
-        //Criteria for the state of the phone
-        Criteria criteria = new Criteria();
-        
-        //Best provider, concidering the criteria
-        String provider = locationManager.getBestProvider(criteria, false);
-        
-        //My currently last known position
-        Location location = locationManager.getLastKnownLocation(provider);
-        
-        double lat = 0;
-        double lng = 0;
-        
-        if (location == null) {
-        	Log.i("Map Setup", "Location: null");
-        }
-        else {
-            lat =  location.getLatitude();
-            lng = location.getLongitude();
+        if (bestLocation == null) {
+            return null;
         }
         
-        //Position
-        myPosition = new LatLng(lat, lng);
-        
-        //Move camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
-        //mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
-        
-        Log.i("Map Setup", "Animation setup done!");
-
-		//Add marker for refrence
-		myMarker = new MarkerOptions();
-		myMarker.title("You are here!");
-		myMarker.snippet(new Timestamp(date.getTime()).toString());
-		myMarker.position(myPosition);
-		myMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.img_pin_red));
-        mMap.addMarker(myMarker);
-        
-        Log.i("Map Setup", "Map setup done!");
-        
-        //Load saved events
-        loadFromDatabase();
-	}
+        return bestLocation;
+    }
 	
 	private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -280,7 +347,7 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
     	mMap.clear();
     	
     	//Add my marker
-    	mMap.addMarker(myMarker);
+    	//mMap.addMarker(myMarker);
 
     	//For all stored markers
         for (Event curEvent : events.values()) {
@@ -313,7 +380,7 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
     		nRange = MIN_RANGE;
     		nSilenceOption = 0;
     		nInternetOption = 0;
-    		nRingtone = getResources().getString(R.string.notSet);
+    		nRingtone = "NOT SET";
     		eventId = "" + totalEvents;
     		newEvent = new Event();
     	}
@@ -356,7 +423,7 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
     }
 
 	@Override
-	public void onMapClick(LatLng position) {
+	public void onMapLongClick(LatLng position) {
 		createNewEvent(position);
 		
 		//Pass event data
@@ -405,7 +472,7 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 				    Log.i("RETURN_EVENT", "Range: " + editEvent.range);
 				    Log.i("RETURN_EVENT", "Silence: " + editEvent.silenceOption);
 				    Log.i("RETURN_EVENT", "Internet: " + editEvent.internetOption);
-				    Log.i("RETURN_EVENT", "Ringtone: " + editEvent.ringtoneResource);
+				    Log.i("RETURN_EVENT", "Ringtone: " + editEvent.ringtoneResource.toString());
 				    */
 				    
 				    //Update event
@@ -474,7 +541,7 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 		Point.clear(dbHelper);
 		
 		//Save our last known position
-		Point ourPoint = new Point("LastKnownPosition", myPosition.longitude, myPosition.latitude,0, 0, "", 0);
+		Point ourPoint = new Point("LastKnownPosition", myPosition.latitude, myPosition.longitude, 0, 0, "", 0);
 		ourPoint.save(dbHelper);
 		
 		//For all stored events
@@ -486,7 +553,7 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 			double y = position.longitude;
 			int radius = curEvent.range;
 			int silent = curEvent.silenceOption;
-			String ringtone = ""; //curEvent.ringtoneResource;
+			String ringtone = curEvent.ringtoneResource;
 			int internet = curEvent.internetOption;
 			
 			//Crate the new point
@@ -519,7 +586,7 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 			int radius = points[i].getRadius();
 			int silent = points[i].getMode();
 			int internet = points[i].getConnection();
-			String ringtone = ""; //points[i].getName();
+			String ringtone = points[i].getRingtone();
 			
 			//Create new event
 			Event newEvent = new Event();
@@ -544,7 +611,12 @@ public class LocationActivity extends FragmentActivity implements OnMapClickList
 			}
 		}
 		
+		//Update event counter
+		totalEvents = events.size();
+		
 		//Update map
 		updateMap();
 	}
+
+
 }

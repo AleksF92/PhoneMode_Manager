@@ -1,5 +1,7 @@
 package com.remote.phonemodemanager;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,7 +11,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -49,11 +56,6 @@ public class LocationService extends Service {
 			updater.start();
 			isRunning = true;
 		}
-		
-		//Get owner position
-		double lng = intent.getDoubleExtra("CurrentPositionLng", 0);
-		double lat = intent.getDoubleExtra("CurrentPositionLat", 0);
-		currentPosition = new LatLng(lng, lat);
 		
 		//Initialize default settings
 		defaultSettings = new Event();
@@ -104,25 +106,33 @@ public class LocationService extends Service {
 		}
 		
 		//Internet mode:
+		WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		switch (event.internetOption) {
 			case 1: {
 				//WiFi
+				wifi.setWifiEnabled(true);
+				setMobileData(false);
 				break;
 			}
 			case 2: {
 				//3G
+				wifi.setWifiEnabled(false);
+				setMobileData(true);
 				break;
 			}
 			case 3: {
 				//Wifi + 3G
+				wifi.setWifiEnabled(true);
+				setMobileData(true);
 				break;
 			}
 		}
 		
 		//Ringtone:
-		if (event.ringtoneResource != "") {
+		if (!event.ringtoneResource.equals("NOT SET")) {
 			//Set ringtone
-			//...
+			Uri ringtoneUri = Uri.parse(event.ringtoneResource);
+			RingtoneManager.setActualDefaultRingtoneUri(this, RingtoneManager.TYPE_RINGTONE, ringtoneUri);
 		}
 		
 		if (event == defaultSettings) {
@@ -133,33 +143,59 @@ public class LocationService extends Service {
 		}
 	}
 	
+	public void setMobileData(boolean state) {
+        ConnectivityManager mobileNet = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        Method mobileDataEnabled = null;
+        
+        //Initialize mobile data change
+        try {
+        	mobileDataEnabled = ConnectivityManager.class.getDeclaredMethod("setMobileDataEnabled", boolean.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        
+        mobileDataEnabled.setAccessible(true);
+        
+        try {
+        	mobileDataEnabled.invoke(mobileNet, state);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+	}
+
 	public void checkDistances() {
-		//Start out with default settings
-		activateEvent(defaultSettings);
+		boolean resetToDefault = true;
+		
+		//Initialize results
+		float resultDistance[] = new float[3];
 		
 		//For all the events stored
 		for (Event curEvent : events.values()) {
-        	LatLng position = curEvent.marker.getPosition();
-        	double lon1 = position.longitude;
-        	double lat1 = position.latitude;
-        	double lon2 = currentPosition.longitude;
-        	double lat2 = currentPosition.latitude;
+			//Create event location
+	    	LatLng position = curEvent.marker.getPosition();
+
+        	//Calcualte distance
+        	Location.distanceBetween(currentPosition.latitude, currentPosition.longitude, position.latitude, position.longitude, resultDistance);
+        	int distInMeters = (int) resultDistance[0];
         	
-        	//Haversine formula (longitude latitude TO distance in meters)
-        	int EARTH_RADIUS_KM = 6371;
-        	double lat1Rad = Math.toRadians(lat1);
-        	double lat2Rad = Math.toRadians(lat2);
-        	double deltaLonRad = Math.toRadians(lon2 - lon1);
-        	double dist = Math.acos(Math.sin(lat1Rad) * Math.sin(lat2Rad) + Math.cos(lat1Rad) * Math.cos(lat2Rad) * Math.cos(deltaLonRad)) * EARTH_RADIUS_KM;
-        	double distInMeters = (int)(dist * 1000);
         	//Check if within range
         	if (distInMeters <= curEvent.range) {
         		//Event should be active
         		activateEvent(curEvent);
+        		resetToDefault = false;
         	}
         	
-        	Log.i(PROCESS, curEvent.marker.getTitle() + "(" + (int)lon1 + ", " + (int)lat1 + ") vs. (" + (int)lon2 + ", " + (int)lat2 + ") - Dist: " + distInMeters + " <= " + (int)curEvent.range);
+        	Log.i(PROCESS, curEvent.marker.getTitle() + " (Distance: " + distInMeters + " meters)");
         }
+		
+		//Restore default settings (if no events in range)
+		if (resetToDefault) {
+			activateEvent(defaultSettings);
+		}
 		
 		//Log.i(PROCESS, "Done checking elements!");
 	}
@@ -172,13 +208,7 @@ public class LocationService extends Service {
 		@Override
 		public void run() {
 			while (isRunning) {
-				//While the service is running
-				//Log.i(PROCESS, "Updating now...");
-				
-				//Check if there are events within range
-				checkDistances();
-				
-				//Wait for next session
+				//Wait session
 				try {
 					sleep(WAIT);
 					runtime += WAIT;
@@ -192,9 +222,13 @@ public class LocationService extends Service {
 				} catch (InterruptedException e) {
 	
 				}
+				
+				//Check if there are events within range
+				checkDistances();
 			}
 		}
 	}
+	
 	
 	public void loadFromDatabase() {
 		//Log.i(PROCESS, "Loading from database...");
@@ -214,7 +248,7 @@ public class LocationService extends Service {
 			int radius = points[i].getRadius();
 			int silent = points[i].getMode();
 			int internet = points[i].getConnection();
-			String ringtone = ""; //points[i].getName();
+			String ringtone = points[i].getRingtone();
 			
 			//Create new event
 			Event newEvent = new Event();
@@ -230,18 +264,19 @@ public class LocationService extends Service {
 			//If first element (LastKnownLocation)
 			if (i == 0) {
 				currentPosition = new LatLng(x, y);
-				Log.i("Map", "Loaded: " + title + ", x: " + (int)x + ", y: " + (int)y);
+				//Log.i("Map", "Loaded: " + title + ", x: " + (int)x + ", y: " + (int)y);
 			}
 			else {
 				//Store new event
 				events.put("" + i, newEvent);
-				Log.i(PROCESS, "Loaded (name: " + title + ", x: " + (int)x + ", y: " + (int)y + ", r: " + radius + ", a: [" + silent + ", " + internet + ", " + ringtone + "])...");
+				//Log.i(PROCESS, "Loaded (name: " + title + ", x: " + (int)x + ", y: " + (int)y + ", r: " + radius + ", a: [" + silent + ", " + internet + ", " + ringtone + "])...");
 			}
 		}
 		
 		//Log.i(PROCESS, "Loaded from database!");
 		
 		//Check if there are events within range
-		checkDistances();
+		//checkDistances();
 	}
+
 }
