@@ -24,6 +24,7 @@
     <!-- Call Manager -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <!-- Maps API needs OpenGL ES 2.0. -->
     <uses-feature
@@ -36,9 +37,7 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
         <!-- This part can be commented out if the map crashes upon loading -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+       
         <!-- Until here -->
         
         <meta-data
@@ -90,6 +89,12 @@
         <activity
             android:name="com.remote.phonemodemanager.CallSettingsActivity"
             android:label="@string/title_activity_call_settings"
+            android:screenOrientation="portrait" >
+        </activity>
+        
+        <activity
+            android:name="com.remote.phonemodemanager.ContactListActivity"
+            android:label="@string/title_activity_contact_list"
             android:screenOrientation="portrait" >
         </activity>
     </application>
